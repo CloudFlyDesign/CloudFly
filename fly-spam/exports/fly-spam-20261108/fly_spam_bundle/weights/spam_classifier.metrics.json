@@ -1,0 +1,6 @@
+{
+  "accuracy": 0.965,
+  "n_train": 800,
+  "n_test": 200,
+  "device": "cpu"
+}

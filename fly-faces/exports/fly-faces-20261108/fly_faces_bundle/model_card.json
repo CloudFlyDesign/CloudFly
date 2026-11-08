@@ -1,0 +1,74 @@
+{
+  "name": "fly-faces-biometrics",
+  "task": "low-res face identification / verification",
+  "created_utc": "2026-11-08T10:19:02.465127+00:00",
+  "input_size": "32x32 grayscale",
+  "n_identities": 31,
+  "recommended_print_identity": "Camila Cabello",
+  "recommended_print_recall": 0.5294117647058824,
+  "recommended_print_n_test": 17,
+  "print_files": [
+    "print_targets\\Camila Cabello\\01.jpg",
+    "print_targets\\Camila Cabello\\02.jpg",
+    "print_targets\\Camila Cabello\\03.jpg"
+  ],
+  "identity_ranking": [
+    {
+      "identity": "Camila Cabello",
+      "recall": 0.5294117647058824,
+      "n_test": 17
+    },
+    {
+      "identity": "Kashyap",
+      "recall": 0.5,
+      "n_test": 6
+    },
+    {
+      "identity": "Ellen Degeneres",
+      "recall": 0.4,
+      "n_test": 15
+    },
+    {
+      "identity": "Marmik",
+      "recall": 0.3333333333333333,
+      "n_test": 6
+    },
+    {
+      "identity": "Vijay Deverakonda",
+      "recall": 0.2608695652173913,
+      "n_test": 23
+    },
+    {
+      "identity": "Lisa Kudrow",
+      "recall": 0.21428571428571427,
+      "n_test": 14
+    },
+    {
+      "identity": "Margot Robbie",
+      "recall": 0.21428571428571427,
+      "n_test": 14
+    },
+    {
+      "identity": "Akshay Kumar",
+      "recall": 0.2,
+      "n_test": 10
+    },
+    {
+      "identity": "Zac Efron",
+      "recall": 0.16666666666666666,
+      "n_test": 18
+    },
+    {
+      "identity": "Hrithik Roshan",
+      "recall": 0.15,
+      "n_test": 20
+    }
+  ],
+  "pi": {
+    "start": "python server.py",
+    "url": "http://<pi-ip>:8787",
+    "camera": "use browser getUserMedia; prefer rear camera for printouts"
+  },
+  "license_note": "fly_engine.pkl derived from FlyWire (CC BY-NC). Face images from Kaggle vasukipatel/face-recognition-dataset (CC0).",
+  "print_note": "Print targets are 32x32-upscaled Camila samples the model correctly IDs. Prefer these over arbitrary HD photos for the Pi camera demo."
+}

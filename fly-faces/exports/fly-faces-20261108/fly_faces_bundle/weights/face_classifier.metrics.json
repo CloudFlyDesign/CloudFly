@@ -1,0 +1,9 @@
+{
+  "top1_accuracy": 0.11695906432748537,
+  "top3_accuracy": 0.253411306042885,
+  "verify_probe_accuracy": 0.5389863547758285,
+  "n_train": 2049,
+  "n_test": 513,
+  "n_identities": 31,
+  "device": "cpu"
+}

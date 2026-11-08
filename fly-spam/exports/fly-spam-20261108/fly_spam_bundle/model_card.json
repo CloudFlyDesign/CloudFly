@@ -1,0 +1,17 @@
+{
+  "name": "fly-spam-classifier",
+  "task": "binary email spam vs ham",
+  "created_utc": "2026-11-08T06:25:43.536793+00:00",
+  "feature_dim": 1200,
+  "feature_transform": "log1p(spike_counts)",
+  "labels": {
+    "0": "ham",
+    "1": "spam"
+  },
+  "includes": {
+    "spam_classifier.pt": "Torch MLP weights + metadata",
+    "fly_engine.pkl": "Frozen olfactory subcircuit (W, receptors, nodes)"
+  },
+  "does_not_include": "Full FlyWire connectome feather (~852 MB) \u2014 not needed for inference",
+  "license_note": "fly_engine.pkl is derived from FlyWire connectome data (CC BY-NC 4.0). Non-commercial use only; cite Dorkenwald et al. 2024 / Schlegel et al. 2024."
+}

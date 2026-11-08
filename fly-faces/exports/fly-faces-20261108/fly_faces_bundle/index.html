@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fly Face Biometrics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;600;700&family=Newsreader:opsz,wght@6..72,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+  <main class="wrap">
+    <header>
+      <p class="eyebrow">Flyputer · low-res biometrics</p>
+      <h1>Camera face ID</h1>
+      <p class="sub">
+        Best print target: <strong id="recName">…</strong>
+        — hold that printout to the Pi camera and capture.
+      </p>
+    </header>
+
+    <section class="stage">
+      <div class="cam-panel">
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="snap" width="320" height="320" hidden></canvas>
+        <div class="cam-actions">
+          <button id="btnStart" class="ghost" type="button">Start camera</button>
+          <button id="btnCapture" class="primary" type="button" disabled>Identify face</button>
+          <button id="btnFlip" class="ghost" type="button">Flip camera</button>
+        </div>
+        <p id="status" class="status">Idle</p>
+      </div>
+
+      <div class="result-panel">
+        <h2>Prediction</h2>
+        <div id="verdict" class="verdict idle">—</div>
+        <div id="bars" class="bars"></div>
+        <div class="print-box">
+          <h2>Print this face</h2>
+          <p id="printHint">Highest holdout recall identity for your demo.</p>
+          <div id="printGallery" class="gallery"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

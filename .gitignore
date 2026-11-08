@@ -1,16 +1,52 @@
+# Secrets / credentials
 .env
+.env.*
+!.env.example
 engine/.env
+atlas-credentials.env
+tiger-cloud-cloudfly-credentials.env
+*.pem
+*.key
+
+# Dependencies / envs
 .venv/
+**/.venv/
 node_modules/
+web/node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# Logs / local runtime
+*.log
+downloads/
+uploads/
+
+# Large connectome / annotation dumps (download via get_data.sh)
 *.feather
-engine/models/
+flyputer/annotations_783.tsv
+flyputer/proofread_connections_783.feather
+flyputer/hero_cache/
 engine/hero_cache/
 engine/saved/
-.env
-engine/.env
-.venv/
-node_modules/
-*.feather
 engine/models/
-engine/hero_cache/
-engine/saved/
+
+# Local datasets / training caches (keep trained weights + export zips)
+archive.zip
+fly-*/data/
+flyputer/.venv/
+
+# Python caches
+**/__pycache__/
+*.py[cod]
+
+# Vite / build caches
+web/.vite/
+**/dist/
+
+# Keep export bundles + trained inference weights for teammates
+# (explicitly not ignored: fly-*/models/*.pt|*.pkl|*.json and fly-*/exports/*.zip)

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fly Cancer Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <p class="eyebrow">Flyputer · Wisconsin cells</p>
+        <h1>Cancer circuit visualizer</h1>
+      </div>
+      <p class="disclaimer">Research / demo only — not for clinical diagnosis.</p>
+    </header>
+
+    <section class="controls">
+      <label>
+        Sample
+        <select id="sampleSelect"></select>
+      </label>
+      <div class="btn-row">
+        <button type="button" id="btnRandom" class="ghost">Random</button>
+        <button type="button" id="btnMalignant" class="ghost">Find malignant</button>
+        <button type="button" id="btnBenign" class="ghost">Find benign</button>
+        <button type="button" id="btnRun" class="primary">Run through fly</button>
+      </div>
+      <p id="status" class="status">Loading samples…</p>
+    </section>
+
+    <main class="grid">
+      <article class="panel result-panel">
+        <h2>Classification</h2>
+        <div class="verdict idle" id="verdict">—</div>
+        <div class="meters">
+          <div>
+            <div class="meter-label"><span>Malignant</span><span id="malPct">0%</span></div>
+            <div class="meter"><i id="malBar" class="mal"></i></div>
+          </div>
+          <div>
+            <div class="meter-label"><span>Benign</span><span id="benPct">0%</span></div>
+            <div class="meter"><i id="benBar" class="ben"></i></div>
+          </div>
+        </div>
+        <dl class="stats" id="stats">
+          <div><dt>Truth</dt><dd id="truth">—</dd></div>
+          <div><dt>Match</dt><dd id="match">—</dd></div>
+          <div><dt>Spikes</dt><dd id="spikes">—</dd></div>
+          <div><dt>Active neurons</dt><dd id="active">—</dd></div>
+        </dl>
+
+        <div class="cell-block">
+          <div class="panel-head">
+            <h2>Cell view</h2>
+            <p id="cellMeta">from FNA nucleus features</p>
+          </div>
+          <canvas id="cellCanvas" width="420" height="280" aria-label="Reconstructed cell nucleus"></canvas>
+          <p class="hint" id="cellHint">
+            Wisconsin ships measurements, not the original photo — this sketch is built from those features.
+          </p>
+        </div>
+      </article>
+
+      <article class="panel brain3d-panel">
+        <div class="panel-head">
+          <h2>3D FlyWire brain</h2>
+          <p id="brain3dSub">drag to rotate · scroll to zoom</p>
+        </div>
+        <div id="brain3d" class="brain3d-host">
+          <p class="brain3d-placeholder">Run a sample to light up the brain</p>
+        </div>
+        <div class="brain3d-tools">
+          <label><input id="ghost3d" type="checkbox" checked /> full brain</label>
+          <label><input id="edges3d" type="checkbox" /> wiring</label>
+          <label><input id="spin3d" type="checkbox" /> spin</label>
+          <span class="legend"><i class="dot mal"></i> input</span>
+          <span class="legend"><i class="dot ben"></i> downstream</span>
+        </div>
+      </article>
+
+      <article class="panel brain-panel">
+        <div class="panel-head">
+          <h2>Spike map</h2>
+          <p id="brainMeta">1200-neuron olfactory subcircuit</p>
+        </div>
+        <canvas id="spikeCanvas" width="640" height="280" aria-label="Neuron spike heatmap"></canvas>
+        <p class="hint">Brightness = spike count after LIF pass through the frozen connectome slice.</p>
+      </article>
+
+      <article class="panel features-panel">
+        <h2>Top cell features</h2>
+        <div id="featureBars" class="feature-bars"></div>
+      </article>
+    </main>
+  </div>
+  <div id="tip3d"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="/brain3d.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
