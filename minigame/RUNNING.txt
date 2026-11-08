@@ -15,10 +15,10 @@ Run the automated PowerShell installer script to set up Python packages
 and compile llama-cpp-python with CUDA GPU offloading:
    .\install.ps1
 
-STEP 2: CONFIGURE YOUR NEUPRINT TOKEN (OPTIONAL)
+STEP 2: CONFIGURE YOUR NEUPRINT TOKEN
 The script defaults to a public token, but if you have your own Janelia 
 neuPrint token, set it as an environment variable in PowerShell:
-   $env:NEUPRINT_TOKEN="YOUR_TOKEN_HERE"
+   $env:NEUPRINT_TOKEN="NEUPRINT_API_KEY"
 
 STEP 3: LAUNCH THE GAME SERVER
 Start the FastAPI backend server using Uvicorn. The script will automatically 
