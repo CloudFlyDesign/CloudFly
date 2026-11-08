@@ -1,0 +1,3 @@
+Don't use anything older than pt4. pt4 and marrowV3 are what the newest platform uses for marrow and bram.
+
+older prototypes are included for no reason. Don't use them
