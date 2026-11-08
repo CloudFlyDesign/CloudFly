@@ -1,0 +1,3 @@
+It is technically a separate mini project from the main project, but it is an interesting use of AI that is local-ai based.
+
+it is meant to target the best games award. Slop from slop i guess
