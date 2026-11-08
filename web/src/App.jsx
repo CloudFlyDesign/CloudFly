@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import Plotly from "plotly.js-dist-min";
 import Brain3D from "./Brain3D";
+import ModelPanel from "./ModelPanel";
 
 const API = "http://localhost:8001";
 const PRESETS = [
@@ -16,6 +17,8 @@ const PRESETS = [
 export default function App() {
   const [query, setQuery] = useState("sugar");
   const [dur, setDur] = useState(200);
+  const [ask, setAsk] = useState("");
+  const [reply, setReply] = useState("");
   const [data, setData] = useState(null);
   const [scene, setScene] = useState(null);
   const [ghost, setGhost] = useState(null);
@@ -27,13 +30,13 @@ export default function App() {
   const rasterRef = useRef(null);
   const barRef = useRef(null);
 
-  async function run(q = query) {
+  async function run(q = query, durOverride) {
     setQuery(q);
     setLoading(true);
     setError("");
     setPlaying(false);
     try {
-      const d = Number(dur);
+      const d = Number(durOverride ?? dur);
       const [sim, sc] = await Promise.all([
         fetch(`${API}/simulate`, {
           method: "POST",
@@ -52,6 +55,26 @@ export default function App() {
       setError(String(e.message || e));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function askFly() {
+    if (!ask.trim()) return;
+    setError("");
+    setReply("");
+    try {
+      const r = await fetch(`${API}/command`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: ask }),
+      });
+      if (!r.ok) throw new Error((await r.json()).detail || "command failed");
+      const cmd = await r.json();
+      setReply(cmd.reply || "");
+      setDur(cmd.dur_ms);
+      run(cmd.query, cmd.dur_ms);
+    } catch (e) {
+      setError(String(e.message || e));
     }
   }
 
@@ -184,6 +207,20 @@ export default function App() {
     >
       <h1>CloudFly: Poke a Brain</h1>
 
+      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+        <input
+          style={{ flex: 1 }}
+          placeholder='Try: "what happens when the fly tastes milk?"'
+          value={ask}
+          onChange={(e) => setAsk(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && askFly()}
+        />
+        <button onClick={askFly} disabled={loading}>
+          Ask the fly
+        </button>
+      </div>
+      {reply && <p style={{ fontStyle: "italic" }}>{reply}</p>}
+
       <div
         style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}
       >
@@ -239,6 +276,8 @@ export default function App() {
         Orange = stimulated input, blue = downstream response. Drag to rotate,
         scroll to zoom.
       </p>
+
+      <ModelPanel api={API} />
 
       {data && (
         <p>

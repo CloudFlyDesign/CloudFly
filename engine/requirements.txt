@@ -4,3 +4,9 @@ numpy>=1.24
 ollama>=0.3
 matplotlib>=3.7
 cloud-volume>=8.0   # optional: real neuron shapes (hero arbors) in the 3D view
+fastapi==0.162.2
+google-genai==3.0.0
+python-dotenv==1.2.4
+scikit-learn==1.9.1
+torch==2.15.0
+uvicorn==0.54.0

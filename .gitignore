@@ -1,0 +1,16 @@
+.env
+engine/.env
+.venv/
+node_modules/
+*.feather
+engine/models/
+engine/hero_cache/
+engine/saved/
+.env
+engine/.env
+.venv/
+node_modules/
+*.feather
+engine/models/
+engine/hero_cache/
+engine/saved/
