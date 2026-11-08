@@ -15,7 +15,7 @@ from neuprint import Client, fetch_adjacencies
 
 # 1. Initialize live Janelia neuPrint Client for MaleCNS v1.0
 NEUPRINT_TOKEN = os.getenv("NEUPRINT_TOKEN", "YOUR_TOKEN_HERE")
-client = Client("https://neuprint.janelia.org", dataset="male-cns:v1.0", token="27e3fd572fe3d5314e5c90c8874a9ff35c4be88efb28e44d4fefd40ff4884aea")
+client = Client("https://neuprint.janelia.org", dataset="male-cns:v1.0", token="NEUPRINT_API_KEY")
 
 class NeuPrintLiveFlyEngine:
     """Fetches live synaptic pathways from Janelia MaleCNS to calculate prompt valence."""
