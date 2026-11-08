@@ -6,11 +6,11 @@ function fromText(raw: string) {
   let xai = "";
   for (const line of raw.split("\n")) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#(process.env.XAI_API_KEY ?? "")=")) continue;
+    if (!trimmed || trimmed.startsWith("#") || !trimmed.includes("=")) continue;
     const i = trimmed.indexOf("=");
     const key = trimmed.slice(0, i).trim();
     const value = trimmed.slice(i + 1).trim().replace(/^["']|["']$/g, "");
-    if (key === (process.env.XAI_API_KEY ?? "") && value) grok = value;
+    if (key === "GROK_API_KEY" && value) grok = value;
     if (key === "XAI_API_KEY" && value) xai = value;
   }
   return xai || grok;
@@ -20,7 +20,7 @@ function fromText(raw: string) {
 export function grokKey() {
   const fromEnv = (process.env.XAI_API_KEY || process.env.GROK_API_KEY || "").trim();
   if (fromEnv) return fromEnv;
-  const candidates = [join(process.cwd(), ".env(process.env.XAI_API_KEY ?? "")..", ".env"), "/workspace/.env"];
+  const candidates = [join(process.cwd(), ".env"), join(process.cwd(), "..", ".env"), "/workspace/.env"];
   for (const path of candidates) {
     try {
       const found = fromText(readFileSync(path, "utf8"));

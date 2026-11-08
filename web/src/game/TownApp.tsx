@@ -27,13 +27,14 @@ export default function TownApp() {
       <header className="relative z-20 flex items-center justify-between gap-3 border-b border-line bg-foam px-4 py-2">
         <button
           type="button"
-          className="font-display text-lg"
+          className="flex items-center gap-2 font-display text-lg"
           onClick={() => {
             setTab("chat");
             setCamera("overview");
             closePanel();
           }}
         >
+          <img src="/cloudfly-logo.png" alt="" className="h-8 w-8 object-contain" />
           CloudFly
         </button>
         <nav className="flex gap-1 rounded-full bg-sage p-1 text-sm">

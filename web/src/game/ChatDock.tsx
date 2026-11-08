@@ -219,15 +219,20 @@ export function ChatDock() {
         /* keep a plain line, not only the numbers */
       }
       if (spoken === stepped.line) {
-        spoken = stepped.mood.includes("STARVING")
-          ? "I can't stay on your question. I need food."
-          : stepped.mood.includes("PARANOID")
-            ? "Don't come closer. Something here is wrong."
-            : stepped.mood.includes("GUSTATORY")
-              ? "This is wonderful. Ask me again while it lasts."
-              : stepped.mood.includes("WIND")
-                ? "I'm flying. Say that once more."
-                : "I'm here. Ask me plainly.";
+        const asked = line.replace(/^hey\s+bram[,:]?\s*/i, "").trim();
+        spoken = /how were you made|how are you made|who made you/i.test(asked)
+          ? "A frozen fruit-fly circuit fires on your sentence, then a model speaks in this mood. That is all I am."
+          : stepped.mood.includes("STARVING")
+            ? "I can't stay on your question. I need food."
+            : stepped.mood.includes("PARANOID")
+              ? "Don't come closer. Something here is wrong."
+              : stepped.mood.includes("GUSTATORY")
+                ? "This is wonderful. Ask me again while it lasts."
+                : stepped.mood.includes("WIND")
+                  ? "I'm flying. Say that once more."
+                  : asked.length > 8
+                    ? `I heard you. ${asked}`
+                    : "I'm here. Ask me plainly.";
       }
       try {
         const traced = await traceLine({ data: { flyId: "bram", text: line } });
