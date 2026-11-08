@@ -5,7 +5,7 @@ from neuprint import Client, fetch_adjacencies
 from llama_cpp import Llama
 
 # Initialize neuPrint client
-client = Client("https://neuprint.janelia.org", dataset="male-cns:v1.0", token="27e3fd572fe3d5314e5c90c8874a9ff35c4be88efb28e44d4fefd40ff4884aea")
+client = Client("https://neuprint.janelia.org", dataset="male-cns:v1.0", token="NEUPRINT_API_KEY")
 
 class MultiModalFlyEngine:
     def __init__(self):
