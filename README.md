@@ -137,23 +137,193 @@ Print the Camila targets under `print_targets/Camila Cabello/`, hold a printout 
 
 ---
 
-## Flyputer engine (shared substrate)
+## Flyputer + engine (shared FlyWire substrate)
 
-`flyputer/` (and the related `engine/` tree) loads the FlyWire edge list + annotations and exposes:
+Two Python trees share the same idea: load the real FlyWire edge list + annotations, run a bounded LIF on a 2-hop subcircuit, and explain what lit up. Wiring stays frozen.
 
-- `find_neurons` — search by type / region  
-- `build_subcircuit` / `run_lif` — stimulate and simulate  
+| Tree | Role |
+|---|---|
+| **`flyputer/`** | Standalone hobby toolkit: Ollama/Gemma chat, CLI demos, 3D export |
+| **`engine/`** | HackRPI stack: same `flysim` core **plus** FastAPI train/predict APIs (`main.py`) and the live chat+3D server (`server.py`) |
+
+Core primitives (`flysim.py` in either tree):
+
+- `find_neurons` — search by cell type / class / region  
+- `stimulate` / LIF — inject current, spike-count readout on the downstream subgraph  
+- `shortest_path` — BFS wiring distance (“six degrees”)  
 - `export3d` — soma positions + ghost brain for Three.js  
-- Optional chat agent + playable escape / compass demos  
 
-One-time connectome download (~852 MB):
+### Connectome setup (one-time, ~852 MB)
 
 ```bash
-cd flyputer   # or engine/
+cd engine    # or flyputer/
+python3 -m venv .venv --system-site-packages
+.venv/bin/pip install -r requirements.txt   # Windows: .venv\Scripts\pip …
 bash get_data.sh
 ```
 
-Annotations (~32 MB) auto-download on first use. Large dumps are gitignored; run `get_data.sh` locally after clone.
+Annotations (~32 MB) auto-download on first use. Large dumps are gitignored.
+
+### Live chat + 3D — `engine/server.py`
+
+Local **Gemma** via Ollama drives tool calls; the left pane is a live FlyWire 3D view.
+
+```bash
+ollama pull gemma3:4b   # or set MODEL in agent.py
+cd engine
+.venv/bin/python server.py    # http://localhost:8000
+```
+
+Example prompts (each returns an energy ledger vs a clocked chip):
+
+| Ask… | What runs |
+|---|---|
+| Smell cascade | Stimulate olfactory neurons → show3d |
+| AND / OR / AND-NOT gate | Real convergent motifs (`logic.py`) |
+| Add / multiply | Gates composed into adder/multiplier (`flymath.py`) |
+| Compass / heading | EPG ring attractor + dial (`compass.py`) |
+| Walk / escape | Real descending command neurons → body stand-in (`fly.py`) |
+| Navigate from heading N | Closed-loop compass → PFL3 → DNa02 |
+| Path sugar → motor | Shortest wiring path (topology, not timing) |
+| Swat the fly | Playable LPLC2/LC4 → Giant Fiber game (`swatter.py`) |
+| Two smells | Sparse near-disjoint Kenyon codes (`sniff.py`) |
+| Heart on the eye | L1→Mi1 optic-lobe image relay (`optic.py`) |
+
+CLI pieces (no browser):
+
+```bash
+cd engine
+.venv/bin/python agent.py -i
+.venv/bin/python visualize.py "mushroom body" 30 300
+.venv/bin/python export3d.py olfactory 40 200
+.venv/bin/python logic.py && .venv/bin/python flymath.py
+.venv/bin/python compass.py && .venv/bin/python swatter.py
+.venv/bin/python sniff.py && .venv/bin/python optic.py heart
+.venv/bin/python flysim.py    # smoke test, no LLM
+.venv/bin/python eval.py      # validation harness
+```
+
+### FastAPI train / simulate — `engine/main.py`
+
+CloudFly engine HTTP API (CORS open; connectome warmed on startup):
+
+```bash
+cd engine
+.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8001
+```
+
+| Method | Path | Role |
+|---|---|---|
+| GET | `/brain` | Full-brain ghost point cloud |
+| GET | `/scene` | Stimulate query → 3D scene payload |
+| GET | `/neurons` | Neuron lookup by region / type |
+| POST | `/simulate` | LIF run; stores result under `/runs/{id}` |
+| POST | `/train` | Spike-encode texts → train a small head |
+| POST | `/supervise` | Multi-round supervised job (poll `/supervise/{id}`) |
+| POST | `/train_fly` | Toy or news dataset fly-training job |
+| POST | `/pipeline` | End-to-end urgent/news pipeline job |
+| GET | `/pipeline/saved/{task}` | Last saved pipeline artifact |
+| POST | `/command` | Natural-language command → Gemini helper |
+| POST | `/predict` | Infer with a trained / saved head |
+
+Honest limits (same as flyputer): toy signs (ACh+/GABA·Glu−), 2-hop bound, qualitative rates, brain-only dataset (VNC/muscles are stand-ins). See `engine/README.md` and `engine/CITATION.md`.
+
+---
+
+## Web town (`web/`)
+
+Public site: [cloudfly.design](https://cloudfly.design/) (Vercel). Stack: **React 19**, **Three.js**, **TanStack Start** (Vite on **8080**). No WASD — flies walk themselves; one typed or spoken line routes to a job fly, the frozen ~1,200-neuron circuit fires, then a voice line is phrased.
+
+```text
+line (text / Fish STT)
+    → route-task (name or job match)
+    → classifier / lookout / body / tool
+    → LIF on inlined circuit weights
+    → label or tool result (immutable)
+    → Grok phrase (or Gemini for Bram) → Fish TTS
+    → Brain.tsx neuron view
+```
+
+Labels are **not** chosen by the chatbot. Grok only rewrites a finished decision in the fly’s voice. Tool flies call a real service, then still record spikes on the sentence.
+
+### Run / build
+
+```bash
+cd web
+npm install
+npm run dev      # http://localhost:8080
+npm run build    # Vercel / Nitro output
+```
+
+Detail, controls, and deploy notes: `web/README.md`.
+
+### UI map
+
+| Piece | File | Role |
+|---|---|---|
+| Screen / cameras / status | `src/game/TownApp.tsx` | Chat ↔ Town ↔ neuron view |
+| Inbox + mic | `src/game/ChatDock.tsx` | Send line, hear Fish STT |
+| Fly list | `src/game/TownDock.tsx` | Roster + “Raise a new fly” |
+| Hill + houses | `src/game/World.tsx` | Iso town |
+| Spike cloud | `src/game/Brain.tsx` | Cells for this sentence |
+| Scores | `src/game/NeuronPanel.tsx` | Readout + spike list |
+| Router | `src/game/route-task.ts` | Which fly owns the line |
+| Seed roster | `src/game/seed.ts` | Shipped flies |
+
+Controls: **CloudFly** (leave neurons → Chat), **Chat / Town**, camera row (**Overview / Follow / Desk / Neurons**). Chat stays open until a sentence lands, then the brain panel opens with that same line.
+
+### Seed flies
+
+| Fly | Kind | Job |
+|---|---|---|
+| Puck | Classifier | Hockey vs space |
+| Pager | Classifier | Urgent vs not urgent |
+| Sieve | Classifier | Spam vs ham (exported ~1,200-neuron spam net, ~96.5% hold-out) |
+| Sip | Lookout | Sugar circuit on/off (sweet tokens on; salt/bitter/water off) |
+| Marrow | Body | Hunger / sugar / danger / wind scenarios |
+| Bram | Body | Second body; Gemini speaks from telemetry (`Bram /scenario …`) |
+| Gale | Tool | Open-Meteo temperature (default Berlin if no city) |
+| Scoop | Tool | Up to three NewsAPI headlines |
+| Post | Tool | One email via Resend |
+| Raised flies | Classifier | School mint: two labels + spike-network fit |
+
+Naming a fly forces that fly (“Goalie” → Puck, “Weather in Paris” → Gale). Unmatched lines fall through to Bram (or Marrow). Score-style labels with home/away parse `3-1` style scores directly.
+
+### Backend (TanStack server functions)
+
+No separate Python process inside `web/`. Secrets stay server-side.
+
+| Module | Role |
+|---|---|
+| `fly-circuit.server.ts` | LIF on the frozen map + readout |
+| `circuit-weights.ts` | Inlined wiring (no loose `circuit/*.bin` on Vercel) |
+| `classify.ts` / `exams.ts` | Classifier call + exam lines |
+| `phrase.ts` | Grok voice rewrite (`grok-4.5`) |
+| `gemini.ts` | Bram only (`gemini-3.1-flash-lite`) |
+| `tools.ts` | Gale / Scoop / Post |
+| `train-run.server.ts` | Fit spike net + try stores |
+| `mint-fly.ts` | Grok curriculum for a new fly |
+| `speak.ts` / `hear.ts` | Fish Audio TTS / STT |
+
+Raised-fly training: fit spikes → optional Mongo (lines) → Databricks (note) → Vultr object storage (file) → Tiger/Timescale (score). A missing store still returns coins; it does not abort the run.
+
+### Services / env
+
+Copy root `.env.example` → `.env` (and web-local secrets as in `web/README.md`). Never commit real credentials.
+
+| Piece | Env / notes |
+|---|---|
+| Grok | `XAI_API_KEY` or `GROK_API_KEY` |
+| Gemini | `GEMINI_API_KEY` (Bram) |
+| Fish Audio | `FISH_API_KEY` |
+| NewsAPI | `NEWS_API_KEY` |
+| Resend | `RESEND_API_KEY` (domain must be verified for non-account inboxes) |
+| MongoDB | `MONGODB_URI` |
+| Tiger | `TIGER_DATABASE_URL` |
+| Databricks | `DATABRICKS_HOST`, `DATABRICKS_TOKEN` |
+| Vultr | `VULTR_API_KEY` — **object storage for training files only**, not the web host |
+
+Open-Meteo needs no key. Circuit weights need no key.
 
 ---
 
@@ -165,44 +335,32 @@ Speech → config → train → store → infer → speech:
 Fish Audio STT
     → Grokbot (orchestrator)
         → Gemini: task description → NN train config JSON
-        → Vultr: train job (fly encode + Torch)
+        → Vultr: train job (fly encode + Torch) / object store
         → Mongo (model blobs) + Tiger (metrics) + Databricks (runs)
-    → Grokbot calls /infer
+    → Grokbot calls /infer  (engine FastAPI or web classify)
 → Fish Audio TTS
 ```
 
-Config knobs (schema-driven): encoder type, receptor count, hops, MLP size, lr/epochs, accept threshold. The fly wiring stays fixed; agents only fill the training recipe.
+Config knobs (schema-driven): encoder type, receptor count, hops, MLP size, lr/epochs, accept threshold. Fly wiring stays fixed; agents only fill the training recipe.
 
-Helpers already in-repo for storage/metrics: `server.js`, `db.js`, `tiger.js`, `scripts/*`.
-
----
-
-## Web town (`web/`)
-
-Interactive town: typed/spoken line → route to a fly “job” → frozen circuit activation view → voiced reply (Grok / Gemini / tools). See `web/README.md` for install and deploy.
-
-```bash
-cd web
-npm install
-npm run dev
-```
+Root helpers for storage/metrics: `server.js`, `db.js`, `tiger.js`, `scripts/*`.
 
 ---
 
-## Repo layout (ML-focused)
+## Repo layout
 
 ```text
 CloudFly/
-  flyputer/           # FlyWire LIF + tools (download connectome separately)
+  flyputer/           # FlyWire LIF + Gemma chat demos (download connectome)
+  engine/             # Same substrate + FastAPI train/predict + chat server
   fly-spam/           # email spam pipeline + export
   fly-cancer/         # Wisconsin cancer pipeline + 3D visualizer
   fly-faces/          # low-res face ID/verify + Pi camera export
-  engine/             # chat/3D/train engine (HackRPI stack)
-  web/                # town frontend
+  web/                # iso town UI (TanStack Start → Vercel)
   server.js           # Mongo files + Tiger metrics API
 ```
 
-Trained inference artifacts are committed under `fly-*/models/` and `fly-*/exports/*.zip` so demos work without re-training. Raw datasets, `.feather`, and credential files are **not** committed.
+Trained inference artifacts live under `fly-*/models/` and `fly-*/exports/*.zip` so demos work without re-training. Raw datasets, `.feather`, and credential files are **not** committed.
 
 ---
 
@@ -210,15 +368,22 @@ Trained inference artifacts are committed under `fly-*/models/` and `fly-*/expor
 
 ```bash
 git pull
-# optional: connectome for live flyputer / engine
-cd flyputer && bash get_data.sh && cd ..
 
-# face Pi demo (no full feather needed — engine.pkl is in the zip)
-cd fly-faces/exports   # or unzip the committed fly-faces-*.zip
-# follow export README → python server.py
+# Town UI
+cd web && npm install && npm run dev
+
+# Engine chat + 3D (needs Ollama + connectome)
+cd engine && bash get_data.sh
+.venv/bin/python server.py          # :8000
+
+# Engine FastAPI (optional)
+.venv/bin/uvicorn main:app --port 8001
+
+# Face Pi demo (no full feather — engine.pkl is in the zip)
+cd fly-faces && python export_model.py   # or unzip exports/fly-faces-*.zip
 ```
 
-Copy `.env.example` → `.env` for Mongo/Tiger/Fish keys. Never commit real credentials.
+Copy `.env.example` → `.env` for Mongo/Tiger/Fish/Grok keys.
 
 ---
 
