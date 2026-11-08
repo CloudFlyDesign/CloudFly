@@ -1,0 +1,43 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "CloudFly Town",
+      "hasCanvas": false,
+      "bodyTextLen": 17,
+      "bodyTextHash": "12ce8845271c8e54a3d98a989ca98e5a7411f8de101c9b4301c85f19bd2dc03c",
+      "bodyTextPrefix": "Opening the town…",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "CloudFly Town",
+      "hasCanvas": false,
+      "bodyTextLen": 17,
+      "bodyTextHash": "12ce8845271c8e54a3d98a989ca98e5a7411f8de101c9b4301c85f19bd2dc03c",
+      "bodyTextPrefix": "Opening the town…",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": true,
+  "baselineReasons": [
+    "desktop: canvas disappeared",
+    "desktop: body text collapsed (410 -> 17 chars)",
+    "mobile: canvas disappeared",
+    "mobile: body text collapsed (375 -> 17 chars)"
+  ]
+}
