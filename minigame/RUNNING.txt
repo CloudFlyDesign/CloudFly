@@ -1,0 +1,41 @@
+=====================================================================
+          JANELIA MALECNS 3D GENERATIVE COLONY GAME
+=====================================================================
+
+PREREQUISITES:
+1. Python 3.10+ installed.
+2. NVIDIA GPU (RTX 3060 Mobile or better) with CUDA Toolkit installed.
+3. The following files in your game directory:
+   - fly_agent.py
+   - server.py
+   - install.ps1
+
+STEP 1: INSTALL DEPENDENCIES
+Run the automated PowerShell installer script to set up Python packages 
+and compile llama-cpp-python with CUDA GPU offloading:
+   .\install.ps1
+
+STEP 2: CONFIGURE YOUR NEUPRINT TOKEN (OPTIONAL)
+The script defaults to a public token, but if you have your own Janelia 
+neuPrint token, set it as an environment variable in PowerShell:
+   $env:NEUPRINT_TOKEN="YOUR_TOKEN_HERE"
+
+STEP 3: LAUNCH THE GAME SERVER
+Start the FastAPI backend server using Uvicorn. The script will automatically 
+download the unsloth/gemma-4-E2B-it-GGUF model on first launch and offload 
+all tensor computations to your RTX 3060 GPU:
+   python -m uvicorn server:app --reload --port 8000
+
+STEP 4: PLAY IN THE BROWSER
+Open your web browser and navigate to:
+   http://localhost:8000
+
+CONTROLS & FEATURES IN THE 3D ARENA:
+- 4 Fruit Fly Agents (Alpha, Beta, Gamma, Delta) auto-spawn on startup.
+- Real-time floating HTML badges track each fly's Name, Hunger %, and Mood.
+- Type any scenario (e.g., "sugar_spill", "toxic_hazard", "windy_tunnel") into 
+  the UI input box and click "Inject Scenario".
+- The AI World Director instantly alters the 3D lighting, background, and 
+  generates interactive world objects in real time!
+- Use '+ Add Fly' and '- Delete Fly' buttons to dynamically modify the colony.
+=====================================================================
