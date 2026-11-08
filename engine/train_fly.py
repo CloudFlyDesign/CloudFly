@@ -299,9 +299,25 @@ def train_fly(dataset="toy", pool_query="olfactory", pool_size=200,
 
     os.makedirs(MODEL_DIR, exist_ok=True)
     model_id = uuid.uuid4().hex[:8]
+    # Determine label names from task
+    if "urgent" in task.lower():
+        label_names = ["not_urgent", "urgent"]
+    elif "hockey" in task.lower() or "space" in task.lower():
+        label_names = ["hockey", "space"]
+    else:
+        label_names = ["class_0", "class_1"]
     np.savez_compressed(os.path.join(MODEL_DIR, f"{model_id}.npz"),
                         root_ids=np.array(nodes, dtype=np.int64),
-                        post=post, pre=pre, phi=vals_phi)
+                        post=post, pre=pre, phi=vals_phi,
+                        readout_weight=net.readout.weight.detach().numpy(),
+                        readout_bias=net.readout.bias.detach().numpy(),
+                        pool_query=pool_query,
+                        pool_size=pool_size,
+                        hops=hops,
+                        neurons_per_word=neurons_per_word,
+                        steps=steps,
+                        label_names=np.array(label_names),
+                        pool_ids=np.array(pool, dtype=np.int64))
 
     chance = float(np.bincount(y_np[te]).max() / len(te))
     return {
@@ -341,6 +357,44 @@ def start_fly_job(**kw) -> str:
 
     threading.Thread(target=work, daemon=True).start()
     return job_id
+
+
+def load_fly(model_id: str):
+    """Rebuild a trained FlyNet from saved npz. Returns (net, pool, label_names, meta)."""
+    path = os.path.join(MODEL_DIR, f"{model_id}.npz")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"model {model_id} not found")
+    data = np.load(path, allow_pickle=True)
+    pool_query = str(data["pool_query"])
+    pool_size = int(data["pool_size"])
+    hops = int(data["hops"])
+    neurons_per_word = int(data["neurons_per_word"])
+    steps = int(data["steps"])
+    label_names = list(data["label_names"])
+    pool_ids = list(data["pool_ids"])
+    # Rebuild the circuit
+    pool, nodes, idx, W, keep = build_fly(pool_query, pool_size, hops)
+    pool_rows = [idx[p] for p in pool if p in idx]
+    net = FlyNet(W, pool_rows, keep, steps, train_circuit=False)
+    # Apply saved phi (sparse)
+    phi = np.zeros_like(net.phi.detach().numpy())
+    post = data["post"]
+    pre = data["pre"]
+    vals = data["phi"]
+    phi[post, pre] = vals
+    with torch.no_grad():
+        net.phi.copy_(torch.tensor(phi, dtype=torch.float32))
+        net.readout.weight.copy_(torch.tensor(data["readout_weight"], dtype=torch.float32))
+        net.readout.bias.copy_(torch.tensor(data["readout_bias"], dtype=torch.float32))
+    meta = {
+        "pool_query": pool_query,
+        "pool_size": pool_size,
+        "hops": hops,
+        "neurons_per_word": neurons_per_word,
+        "steps": steps,
+        "n_nodes": len(nodes),
+    }
+    return net, pool, label_names, meta, nodes, idx
 
 
 if __name__ == "__main__":

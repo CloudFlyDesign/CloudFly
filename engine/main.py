@@ -13,8 +13,8 @@ import flysim
 from gemini_util import gemini_call
 from simulate import simulate
 from supervisor import start_job, jobs
-from train_task import run_training
-from train_fly import start_fly_job, jobs as fly_jobs
+from train_fly import start_fly_job, jobs as fly_jobs, load_fly
+from train_task import run_training, encode
 from pipeline import start_pipeline, jobs as pipe_jobs, SAVE_DIR
 
 
@@ -221,3 +221,37 @@ def command(req: CommandRequest):
         raise HTTPException(status_code=422, detail=f"Unknown query: {cmd.get('query')}")
     cmd["dur_ms"] = int(min(max(cmd.get("dur_ms", 200), 50), 500))
     return cmd
+
+
+class PredictRequest(BaseModel):
+    model_id: str
+    text: str
+
+
+@app.post("/predict")
+def predict(req: PredictRequest):
+    try:
+        net, pool, label_names, meta, nodes, idx = load_fly(req.model_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="model not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"load failed: {e}")
+    drive_ids, vec = encode(req.text, pool, meta["neurons_per_word"])
+    import torch
+    with torch.no_grad():
+        pattern = torch.tensor(vec, dtype=torch.float32).unsqueeze(0)
+        logits = net(pattern)
+        probs = torch.softmax(logits, dim=-1)[0]
+        pred = int(logits.argmax(1).item())
+        confidence = float(probs[pred])
+    # Simple spike summary: total counts on keep neurons (full times would require instrumenting FlyNet)
+    features = net.features(pattern).detach().numpy()[0]
+    return {
+        "label": label_names[pred],
+        "confidence": round(confidence, 3),
+        "label_index": pred,
+        "spike_features": [round(float(x), 4) for x in features[:20]],  # sample for UI
+        "n_active": int((features > 0).sum()),
+        "model_id": req.model_id,
+        "note": "Full spike raster for 3D requires recording times inside FlyNet; counts shown.",
+    }
