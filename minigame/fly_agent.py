@@ -4,7 +4,7 @@ import numpy as np
 from neuprint import Client, fetch_adjacencies
 from llama_cpp import Llama
 
-NEUPRINT_TOKEN = os.getenv("NEUPRINT_TOKEN", "27e3fd572fe3d5314e5c90c8874a9ff35c4be88efb28e44d4fefd40ff4884aea")
+NEUPRINT_TOKEN = os.getenv("NEUPRINT_TOKEN", "NEUPRINT_API_KEY")
 client = Client("https://neuprint.janelia.org", dataset="male-cns:v1.0", token=NEUPRINT_TOKEN)
 
 class FlyAgent:
