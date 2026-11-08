@@ -5,8 +5,8 @@ from neuprint import Client, fetch_adjacencies
 import google.generativeai as genai
 
 # 1. Initialize live Janelia neuPrint Client for MaleCNS v1.0
-NEUPRINT_TOKEN = os.getenv("NEUPRINT_TOKEN", "27e3fd572fe3d5314e5c90c8874a9ff35c4be88efb28e44d4fefd40ff4884aea")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6LudU2FugxEY2dJxbOfEwaLwGh2iG2jYOXreANq8tykIQ");
+NEUPRINT_TOKEN = os.getenv("NEUPRINT_TOKEN", "NEUPRINT_TOKEN")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "GEMINI_PRO_KEY");
 client = Client("https://neuprint.janelia.org", dataset="male-cns:v1.0", token=NEUPRINT_TOKEN)
 
 # Initialize Gemini API
